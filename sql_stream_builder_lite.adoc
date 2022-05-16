@@ -174,12 +174,7 @@ Streams Messaging Manager Web UI*).
 ... Availability: `Low`
 ... Cleanup Policy: `delete`
 
-. Back in SSB to create the Sink Table, click on *Console* (on the left bar) *> Tables > Add Table > Apache Kafka*.
-marcel top
-
-On the SSB UI:
-
-. Click on Console (on the left bar) *> Compose > SQL*
+. Back in SSB: Click on Console (on the left bar) *> Compose > SQL*
 +
 . Enter `Sensor6Stats` for the *SQL Job Name* field.
 +
