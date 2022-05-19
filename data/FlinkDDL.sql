@@ -24,7 +24,7 @@ CREATE TABLE table_WeatherCondition (
 ) WITH (
  'connector' = 'kafka',
  'topic' = 'kafka_LookupWeatherCondition',
- 'properties.bootstrap.servers' = 'edge2ai-0.dim.local:9092',
+ 'properties.bootstrap.servers' = '<CLUSTER_HOSTNAME>:9092',
  'properties.group.id' = 'kafka_LookupWeatherCondition',
  'format' = 'csv',
  'csv.ignore-parse-errors' = 'true',

@@ -99,7 +99,7 @@ image::images/create_pgroup_lite.png[width=800]
 +
 ----
 Name: NiFi Registry
-URL:  http://edge2ai-0.dim.local:18080
+URL:  http://<CLUSTER_HOSTNAME>:18080
 ----
 +
 image::images/global_controller_settings.png[width=800]
@@ -123,7 +123,7 @@ Flow Name: SensorProcessGroup
 +
 [source]
 ----
-Schema Registry URL: http://edge2ai-0.dim.local:7788/api/v1
+Schema Registry URL: http://<CLUSTER_HOSTNAME>:7788/api/v1
 ----
 
 +
@@ -169,7 +169,7 @@ image::images/add_ConsumeMQTT_lite.png[width=800]
 +
 [source]
 ----
-Broker URI:                            tcp://edge2ai-0.dim.local:1883
+Broker URI:                            tcp://<CLUSTER_HOSTNAME>:1883
 Client ID:                             sensor-iot
 Topic Filter:                          iot/#
 Max Queue Size:                        60
@@ -220,7 +220,7 @@ Name:                                  Publish to Kafka topic: iot
 +
 [source]
 ----
-Kafka Brokers:                         edge2ai-0.dim.local:9092
+Kafka Brokers:                         <CLUSTER_HOSTNAME>:9092
 Topic Name:                            iot
 Record Reader:                         JsonTreeReader
 Record Writer:                         JsonRecordSetWriter
@@ -362,7 +362,7 @@ Name: Consume Kafka iot messages
 +
 [source]
 ----
-Kafka Brokers:                        edge2ai-0.dim.local:9092
+Kafka Brokers:                        <CLUSTER_HOSTNAME>:9092
 Topic Name(s):                        iot
 Topic Name Format:                    names
 Record Reader:                        JsonTreeReader - With schema identifier
@@ -392,7 +392,7 @@ Name: Write to Kudu
 +
 [source]
 ----
-Kudu Masters:     edge2ai-0.dim.local:7051
+Kudu Masters:     <CLUSTER_HOSTNAME>:7051
 Table Name:       impala::default.sensors
 Record Reader:    JsonTreeReader - With schema identifier
 ----

@@ -45,7 +45,7 @@ sudo wget https://github.com/zBrainiac/kafka-producer/releases/download/0.0.1/ka
 +
 The IoT simulator allows the following input parameters:
 
-.. kafka-broker URI = edge2ai-0.dim.local:9092
+.. kafka-broker URI = <CLUSTER_HOSTNAME>:9092
 .. wait time between msg.= 1000 ms
 +
 Sample command looks like:
@@ -54,7 +54,7 @@ Sample command looks like:
 [source,shell]
 ----
 cd /opt/cloudera/parcels/FLINK/lib/flink/examples/streaming &&
-java -classpath kafka-producer-0.0.1.0.jar producer.KafkaIOTSensorSimulator edge2ai-0.dim.local:9092 1000
+java -classpath kafka-producer-0.0.1.0.jar producer.KafkaIOTSensorSimulator <CLUSTER_HOSTNAME>:9092 1000
 ----
 
 [[lab_1, Lab 1]]
@@ -343,7 +343,7 @@ WARNING: Make sure to stop your queries to release all resources once you finish
 [source,shell]
 ----
 cd /opt/cloudera/parcels/FLINK/lib/flink/examples/streaming
-java -classpath kafka-producer-0.0.1.0.jar producer.KafkaLookupWeatherCondition edge2ai-0.dim.local:9092
+java -classpath kafka-producer-0.0.1.0.jar producer.KafkaLookupWeatherCondition <CLUSTER_HOSTNAME>:9092
 ----
 +
 . Define new virtual table *weather_condition*. To create a new Source Table, click on *Console* (on the left bar).
@@ -379,7 +379,7 @@ CREATE TABLE weather_condition (
 ) WITH (
  'connector' = 'kafka',
  'topic' = 'kafka_LookupWeatherCondition',
- 'properties.bootstrap.servers' = 'edge2ai-0.dim.local:9092',
+ 'properties.bootstrap.servers' = '<CLUSTER_HOSTNAME>:9092',
  'properties.group.id' = 'kafka_LookupWeatherCondition',
  'format' = 'csv',
  'properties.auto.offset.reset' = 'earliest',
@@ -452,7 +452,7 @@ image::images/create_table.png[width=800]
 ----
 Name:           kudu_source
 Catalog Type:   Kudu
-Kudu Master:    edge2ai-0.dim.local:7051
+Kudu Master:    <CLUSTER_HOSTNAME>:7051
 ----
 +
 image::images/ssb-add-kudu-source-virtual-table.png[width=800]

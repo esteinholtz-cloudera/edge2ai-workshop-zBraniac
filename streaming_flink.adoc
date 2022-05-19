@@ -63,7 +63,7 @@ use the first SSH connection to run the Flink application
 ----
 cd /opt/cloudera/parcels/FLINK
 sudo wget https://github.com/zBrainiac/streaming-flink/releases/download/0.4.1/streaming-flink-0.4.1.0.jar -P /opt/cloudera/parcels/FLINK/lib/flink/examples/streaming
-./bin/flink run -m yarn-cluster -c consumer.IoTUC1CountEventsPerSensorId -ynm IoTUC1CountEventsPerSensorId lib/flink/examples/streaming/streaming-flink-0.4.1.0.jar edge2ai-0.dim.local:9092
+./bin/flink run -m yarn-cluster -c consumer.IoTUC1CountEventsPerSensorId -ynm IoTUC1CountEventsPerSensorId lib/flink/examples/streaming/streaming-flink-0.4.1.0.jar <CLUSTER_HOSTNAME>:9092
 ----
 +
 . Let's see how the application works
@@ -73,7 +73,7 @@ sudo wget https://github.com/zBrainiac/streaming-flink/releases/download/0.4.1/s
 [source,shell]
 ----
 $ cd /opt/cloudera/parcels/CDH
-$ ./bin/kafka-console-consumer --bootstrap-server edge2ai-0.dim.local:9092 --topic result_iot_uc1_Count_EventsPerSensorId
+$ ./bin/kafka-console-consumer --bootstrap-server <CLUSTER_HOSTNAME>:9092 --topic result_iot_uc1_Count_EventsPerSensorId
 ----
 +
 SSH connection
@@ -121,7 +121,7 @@ use the new SSH connection to run the Flink application
 [source,shell]
 ----
 cd /opt/cloudera/parcels/FLINK
-./bin/flink run -m yarn-cluster -c consumer.IoTUC2CountEventsPerSensorIdFilter -ynm IoTUC2CountEventsPerSensorIdFilter lib/flink/examples/streaming/streaming-flink-0.4.1.0.jar edge2ai-0.dim.local:9092
+./bin/flink run -m yarn-cluster -c consumer.IoTUC2CountEventsPerSensorIdFilter -ynm IoTUC2CountEventsPerSensorIdFilter lib/flink/examples/streaming/streaming-flink-0.4.1.0.jar <CLUSTER_HOSTNAME>:9092
 ----
 +
 . Let's see how the application works
@@ -131,5 +131,5 @@ cd /opt/cloudera/parcels/FLINK
 [source,shell]
 ----
 $ cd /opt/cloudera/parcels/CDH
-$ ./bin/kafka-console-consumer --bootstrap-server edge2ai-0.dim.local:9092 --topic result_iot_Consumer_Filter
+$ ./bin/kafka-console-consumer --bootstrap-server <CLUSTER_HOSTNAME>:9092 --topic result_iot_Consumer_Filter
 ----
