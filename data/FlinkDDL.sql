@@ -1,0 +1,32 @@
+CREATE TABLE table_WeatherCondition (
+  StationID INT,
+  EventDate STRING,
+  tre200s0 DOUBLE,
+  rre150z0 DOUBLE,
+  sre000z0 DOUBLE,
+  gre000z0 DOUBLE,
+  ure200s0 DOUBLE,
+  tde200s0 DOUBLE,
+  dkl010z0 DOUBLE,
+  fu3010z0 DOUBLE,
+  fu3010z1 DOUBLE,
+  prestas0 DOUBLE,
+  pp0qffs0 DOUBLE,
+  pp0qnhs0 DOUBLE,
+  ppz850s0 DOUBLE,
+  ppz700s0 DOUBLE,
+  dv1towz0 DOUBLE,
+  fu3towz0 DOUBLE,
+  fu3towz1 DOUBLE,
+  ta1tows0 DOUBLE,
+  uretows0 DOUBLE,
+  tdetows0 DOUBLE
+) WITH (
+ 'connector' = 'kafka',
+ 'topic' = 'kafka_LookupWeatherCondition',
+ 'properties.bootstrap.servers' = '<CLUSTER_HOSTNAME>:9092',
+ 'properties.group.id' = 'kafka_LookupWeatherCondition',
+ 'format' = 'csv',
+ 'csv.ignore-parse-errors' = 'true',
+ 'csv.allow-comments' = 'true'
+)

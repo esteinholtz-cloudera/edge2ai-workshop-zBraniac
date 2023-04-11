@@ -1,0 +1,597 @@
+= Querying streams with SQL
+
+NOTE: This lab assumes that the link:streaming_lite.adoc[From Edge to Streams Processing] lab has been completed.
+
+In this workshop you will use SQL Stream Builder to query and manipulate data streams using SQL language. SQL Stream Builder is a powerful service that enables you to create Flink jobs without having to write Java/Scala code.
+
+== Labs summary
+* *Lab 0* - Preparation: Start Kafka Producer (only necessary if you start in an empty environment)
+* *Lab 1* - Create a Data Source for IoT Topic
+* *Lab 2* - Create a Source Virtual Table for the IoT topic with JSON messages
+* *Lab 3* - Run a simple query
+* *Lab 4* - Computing and storing aggregation results
+* *Lab 5* - Create a Source Virtual Table for WeatherCondition topic in CSV format
+* *Lab 6* - Join two Kafka topics
+* *Lab 7* - Look up Reference data stored in Kudu
+* *Lab 8* - Materialized Views
+* *Lab 9* - Perform an HTTP action
+
+
+== Introduction
+
+In this lab, and the subsequent ones, we will use the `iot` topic created and populated in previous labs and contains a datastream of computer performance data points. If you start in an empty environment do *Step 0* first
+
+So let's start with a straightforward goal: to query the contents of the `iot` topic using SQL to examine the data that is being streamed.
+
+Albeit simple, this task will show the ease of use and power of SQL Stream Builder (SSB).
+
+
+[[lab_0, Lab 0]]
+== Lab 0 - Create a Data Source for IoT Topic
+. Open one SSH connections to your LAB environment via a browser or terminal
++
+The details for the connection are available on the LAB environment overview page.
++
+image::images/flink_ssl_lite.png[width=800]
+
+. Use the first SSH connection to download a JAVA App which generates sample messages a publishing into Kafka `iot` topic
++
+[source,shell]
+----
+sudo wget https://github.com/zBrainiac/kafka-producer/releases/download/0.0.1/kafka-producer-0.0.1.0.jar -P /opt/cloudera/parcels/FLINK/lib/flink/examples/streaming
+----
+
+. Switch directory and start JAVA App
++
+The IoT simulator allows the following input parameters:
+
+.. kafka-broker URI = <CLUSTER_HOSTNAME>:9092
+.. wait time between msg.= 1000 ms
++
+Sample command looks like:
++
+
+[source,shell]
+----
+cd /opt/cloudera/parcels/FLINK/lib/flink/examples/streaming &&
+java -classpath kafka-producer-0.0.1.0.jar producer.KafkaIOTSensorSimulator <CLUSTER_HOSTNAME>:9092 1000
+----
+
+[[lab_1, Lab 1]]
+== Lab 1 - Create a Data Source for IoT Topic
+
+Before we can start querying data from Kafka topics we need to register the Kafka clusters as _data sources_ in SSB.
+
+. On the landing page or Cloudera Manager console, click on the Cloudera logo at the top-left corner to ensure you are at the home page and then click on the *SQL Stream Builder* service.
+
+. Click on the *SQLStreamBuilder Console* link to open the SSB UI.
+
+. On the logon screen, authenticate with user `admin` and password `supersecret1`
+
+. Click on *Data Providers* you will notice that SSB already has a Kafka cluster registered as a data source, named `CDP Kafka`. This source is created automatically for SSB when it is installed on a cluster that also has a Kafka service:
++
+image::images/ssb-register-kafka-provider.png[width=800]
+
+. You can use this screen to add other external Kafka clusters as data sources to SSB.
+
+[[lab_2, Lab 2]]
+== Lab 2 - Create a Source Virtual Table for a topic with JSON messages
+
+Now we can _map_ the `iot` topic to a _virtual table_ that we can reference in our query. _Virtual Tables_ on SSB are a way to associate a Kafka topic with a schema so that we can use that as a table in our queries.
+
+We will use a Source Virtual Table now to read from the topic. Later we will look into Sink Virtual Tables to write data to Kafka.
+
+. To create our first Source Virtual Table, click on *Console* (on the left bar) *> Tables > Add table > Apache Kafka*.
++
+image::images/ssb-add-source-virtual-table.png[width=800]
+
+. On the *Kafka Source* window, enter the following information:
++
+[source,yaml]
+----
+Virtual table name: iot_enriched_source
+Kafka Cluster:      CDP Kafka
+Topic Name:         iot
+Data Format:        JSON
+----
++
+image::images/ssb-kafka-source.png[width=400]
+
+. Ensure the *Schema* tab is selected. Scroll to the bottom of the tab and click *Detect Schema*. SSB will take a sample of the data flowing through the topic and will infer the schema used to parse the content. Alternatively you could also specify the schema in this tab.
++
+
+image::images/ssb-detect-schema.png[width=400]
+. Click on the *Event Time* tab, define your time handling. You can specify Watermark Definitions when adding a Kafka table. Watermarks use an event time attribute and have a watermark strategy, and can be used for various time-based operations.
++
+The *Event Time* tab provides the following properties to configure the event time field and watermark for the Kafka stream:
+
+* *Input Timestamp* Column: name of the timestamp column in the Kafka table from where the event time column is mapped. If you wanna use a colume from the event message you have to unselect the box _Use Kafka Timestamp_ first.
+* *Event Time* Column: new name of the timestamp column where the watermarks are going to be mapped
+* *Watermark seconds* : number of seconds used in the watermark strategy. The watermark is defined by the current event timestamp minus this value.
++
+[source,yaml]
+----
+Input Timestamp Column: sensor_ts
+Event Time Column:      event_ts
+Watermark Seconds:      3
+----
++
+image::images/ssb-define-timehandling.png[width=400]
+. If we need to manipulate the source data to fix, cleanse or convert some values, we can define *transformations* for the data source to perform those changes. These transformations are defined in Javascript.
++
+The serialized record read from Kafka is provided to the Javascript code in the `record.value` variable. The last command of the transformation must return the serialized content of the modified record.
++
+The `sensor_0` data in the `iot` topic has a pressure expressed in micro-pascal. Let's say we need the value in pascal scale. Let's write a transformation to perform that conversion for us at the source.
++
+Click on the *Transformations* tab and enter the following code in the *Code* field:
++
+[source,javascript]
+----
+// Kafka payload (record value JSON deserialized to JavaScript object)
+var payload = JSON.parse(record.value);
+payload['sensor_0'] = Math.round(payload.sensor_0 * 1000);
+JSON.stringify(payload);
+----
++
+image::images/ssb-source-transformations.png[width=400]
+. Click on the *Properties* tab, enter the following value for the *Consumer Group* property and click *Save changes*.
++
+[source,yaml]
+----
+Consumer Group: ssb-iot-1
+----
+
++
+image::images/ssb-source-properties.png[width=400]
++
+NOTE: Setting the *Consumer Group* properties for a virtual table will ensure that if you stop a query and restart it later, the second query execute will continue to read the data from the point where the first query stopped, without skipping data. *However*, if _multiple queries_ use the same virtual table, setting this property will effectively distribute the data across the queries so that each record is only read by a single query. If you want to share a virtual table with multiple distinct queries, ensure that the Consumer Group property is unset.
+
+[[lab_3, Lab 3]]
+== Lab 3 - Run a simple query
+
+We have now all that we need to run our first query in SSB. We want to simply query the raw contents of topic to ensure that the everything is working correctly before we proceed to do more complex things.
+
+If your environment is healthy and all the steps from previous labs were completed correctly you should be able to visualize the data with the steps below.
+
+. On the SSB UI, click on *Console* (on the left bar) *> Compose > SQL* and type the following query:
++
+[source,sql]
+----
+select *
+from iot_enriched_source
+----
++
+image::images/ssb-compose-sql.png[width=800]
+
+. Set a *SQL Job Name* for your job or use the random name provided.
+
+. Do *not* add a Sink Virtual Table.
+
+. Click *Execute*
+
+. Scroll to the bottom of the page and you will see the log messages generated by your query execution.
++
+image::images/ssb-sql-execution.png[width=800]
+
+. After a few seconds the SQL Console will start showing the results of the query coming from the `iot` topic.
++
+The data displayed on the screen is only a sample of the data returned by the query, not the full data. The column on the right shows the previously defined *Event Time*
++
+image::images/ssb-sql-results.png[width=800]
++
+. well done so let's increase the level of difficulty and replace the existing SQL with the  *HELLO WORLD in streaming* and counting the events by *sensor_id* - standard SQL with *GROUP BY* and *COUNT*.
+
++
+[source,sql]
+----
+select sensor_id,
+  count(*) as sensorCount
+from iot_enriched_source
+group by sensor_id
+----
++
+. After editing SQL - click on *Restart*
++
+
+WARNING: Make sure to stop your queries to release all resources once you finish this lab. You can double-check that all queries/jobs have been stopped by clicking on the *SQL Jobs* tab. If any jobs are still running, you can stop them from that page.
+
+[[lab_4, Lab 4]]
+== Lab 4 - Computing and storing aggregation results
+
+We want to start computing window aggregates for our incoming data stream and make the aggregation results available for downstream applications. SQL Stream Builder's Sink Virtual Tables give us the ability to publish/store streaming data to several different services (Kafka, AWS S3, Google GCS, Elastic Search and generic webhooks). In this lab we'll use a Kafka sink to publish the results of our aggregation to another Kafka topic.
+
+. Let's first create a topic (`sensor6_stats`) where to publish our aggregation results:
+.. Navigate to the SMM UI (*Cloudera Manager > SMM* service *>
+Streams Messaging Manager Web UI*).
+.. On the SMM UI, click the *Topics* tab (image:images/topics_icon.png[width=25]).
+.. Click the *Add New* button.
+.. Enter the following details for the topic and click *Save* when ready:
+... Topic name: `sensor6_stats`
+... Partitions: `10`
+... Availability: `Low`
+... Cleanup Policy: `delete`
+
+=== Create a query
+This query will compute aggregates over 30-seconds windows that slide forward every second. For a specific sensor value in the record (`sensor_6`) it computes the following aggregations for each window:
+
+* Number of events received
+* Sum of the `sensor_6` value for all the events
+* Average of the `sensor_6` value across all the events
+* Min and max values of the `sensor_6` field
+* Number of events for which the `sensor_6` value exceeds `70`
+
+On the SSB UI:
+
+. Click on Console (on the left bar) *> Compose > SQL*
++
+. Enter `Sensor6Stats` for the *SQL Job Name* field.
++
+. In the SQL box type the query shown below.
++
+[source,sql]
+----
+INSERT INTO sensor6_stats_sink
+SELECT
+  i.`sensor_id` as device_id,
+  geo.`city`,
+  geo.`lon`,
+  geo.`lat`,
+  HOP_END(i.`eventTimestamp`, INTERVAL '1' SECOND, INTERVAL '30' SECOND) as windowEnd,
+  count(*) as sensorCount,
+  sum(`sensor_6`) as sensorSum,
+  avg(cast(`sensor_6` as float)) as sensorAverage,
+  min(`sensor_6`) as sensorMin,
+  max(`sensor_6`) as sensorMax,
+  sum(case when `sensor_6` > 70 then 1 else 0 end) as sensorGreaterThan60
+FROM `iot_enriched_source` i
+JOIN `RefData_GeoLocation` FOR SYSTEM_TIME AS OF i.`eventTimestamp` AS geo
+ON i.`sensor_id` = geo.`loc_id`
+GROUP BY
+  i.`sensor_id`, geo.`city`, geo.`lon`, geo.`lat`,
+  HOP(i.`eventTimestamp`, INTERVAL '1' SECOND, INTERVAL '30' SECOND);
+----
+
+. Before you can execute this query, though, the `sensor6_stats_sink` table must be created in SSB, mapping it to the `sensor6_stats` Kafka topic.
+
++
+. Since we want the topic format to be JSON, click on *Templates > cdp-local > JSON*.
++
+image::images/template-kafka-json.png[width=300]
+
+. This will prepend a `CREATE TABLE` DDL to the SQL script to create a table that matches the structure of your query!
++
+image::images/template-table-ddl.png[width=800]
++
+. Most of the table properties are already filled in for you. But there's one you must edit before you execute the statement: the `topic` property.
++
+Edit the DDL statement and replace the `...` value of the `topic` property with the actual topic name: `sensor6_stats`.
++
+image::images/template-table-edited.png[width=300]
++
+. Click *Execute*.
++
+
+. Scroll to the bottom of the page and you will see the log messages generated by your query execution.
++
+image::images/ssb-sql-execution.png[width=800]
+
+. After a few seconds the SQL Console will start showing the results of your aggregation query.
++
+Note that the data displayed on the screen is only a sample of the data returned by the query, not the full data.
++
+image::images/ssb-sql-aggr-results.png[width=800]
+
+. Check the job execution details and logs by clicking on *Console* (on the left bar) *> SQL Jobs* tab. Explore the options on this screen:
++
+--
+.. Click on the `Sensor6Stats` job.
+.. Click on the *Details* tab to see job details.
+.. Click on the *Log* tab to see log messages generated by the job execution.
+--
++
+image::images/ssb-job-details.png[width=800]
+
+. Click on the *Flink Dashboard* link to open the job's page on the dashboard. Navigate the dashboard pages to explore details and metrics of the job execution.
++
+image::images/ssb-job-dashboard.png[width=800]
+
+. Let's query the `sensor6_stats` table to examine the data that is being written to it. First we need to define a Source Table associated with the `sensor6_stats` topic.
++
+--
+.. Click on *Console* (on the left bar) *> Tables > Add Table > Apache Kafka*
+.. On the *Kafka Source* window, enter the following information and click *Save changes*:
++
+[source,yaml]
+----
+Virtual table name: sensor6_stats_source
+Kafka Cluster:      CDP Kafka
+Topic Name:         sensor6_stats
+Data Format:        JSON
+----
+--
+.. Click on *Detect Schema* and wait for the schema to be updated.
+.. Click *Save changes*.
+
+. Click on *Console* (on the left bar) to refresh the screen and clear the SQL Compose field, which may still show the running aggregation job.
++
+Note that the job will continue to run in the background and you can continue to monitor it through the *Job Logs* page.
+
+. Enter the following query in the SQL field and execute it:
++
+[source,sql]
+----
+SELECT *
+FROM sensor6_stats_source
+----
+
+. After a few seconds you should see the contents of the `sensor6_stats` topic displayed on the screen:
++
+image::images/ssb-stats-results.png[width=800]
+
+. You will need to leave the `Sensor6Stats` job running to use it in the next lab. Make sure you stop all other jobs to release cluster resources.
++
+image::images/ssb-jobs-running.png[width=800]
+
+WARNING: Make sure to stop your queries to release all resources once you finish this lab. You can double-check that all queries/jobs have been stopped by clicking on the *SQL Jobs* tab. If any jobs are still running, you can stop them from that page.
+
+
+[[lab_5, Lab 5]]
+== Lab 5 - Create a Source Virtual Table for WeatherCondition topic in CSV format
+. Let's got back to SSH and use the second session
+. Switch directory and start JAVA App which publish messages in CSV format to the topic `kafka_LookupWeatherCondition`
++
+[source,shell]
+----
+cd /opt/cloudera/parcels/FLINK/lib/flink/examples/streaming
+java -classpath kafka-producer-0.0.1.0.jar producer.KafkaLookupWeatherCondition <CLUSTER_HOSTNAME>:9092
+----
++
+. Define new virtual table *weather_condition*. To create a new Source Table, click on *Console* (on the left bar).
+
+. On the *SQL* window, enter the following information:
+
++
+[source,sql]
+----
+CREATE TABLE weather_condition (
+  stationid INT,
+  eventDate STRING,
+  tre200s0 DOUBLE,
+  rre150z0 DOUBLE,
+  sre000z0 DOUBLE,
+  gre000z0 DOUBLE,
+  ure200s0 DOUBLE,
+  tde200s0 DOUBLE,
+  dkl010z0 DOUBLE,
+  fu3010z0 DOUBLE,
+  fu3010z1 DOUBLE,
+  prestas0 DOUBLE,
+  pp0qffs0 DOUBLE,
+  pp0qnhs0 DOUBLE,
+  ppz850s0 DOUBLE,
+  ppz700s0 DOUBLE,
+  dv1towz0 DOUBLE,
+  fu3towz0 DOUBLE,
+  fu3towz1 DOUBLE,
+  ta1tows0 DOUBLE,
+  uretows0 DOUBLE,
+  tdetows0 DOUBLE
+) WITH (
+ 'connector' = 'kafka',
+ 'topic' = 'kafka_LookupWeatherCondition',
+ 'properties.bootstrap.servers' = '<CLUSTER_HOSTNAME>:9092',
+ 'properties.group.id' = 'kafka_LookupWeatherCondition',
+ 'format' = 'csv',
+ 'properties.auto.offset.reset' = 'earliest',
+ 'csv.ignore-parse-errors' = 'true',
+ 'csv.allow-comments' = 'true'
+);
+----
+
+[[lab_6, Lab 6]]
+== Lab 6 - Join two Kafka topics
+
+. Back to the Console
+. Add SQL join statement between `IoT` and `WeatherCondition`
+
+First let's check the data feeds
+
+[source,sql]
+----
+select * from weather_condition
+----
+
+Update the SQL with some join statement
+[source,sql]
+----
+select iot.sensor_id,
+ sensor_0 as pressure,
+ sensor_1 as torsion,
+ tre200s0 as AirTemperature2m
+from iot_enriched_source as iot,  weather_condition as weather
+where iot.sensor_id = weather.stationid
+
+/* or as inner join */
+
+select iot.sensor_id,
+ sensor_0 as pressure,
+ sensor_1 as torsion,
+ tre200s0 as AirTemperature2m
+from iot_enriched_source as iot
+inner join weather_condition as weather
+on iot.sensor_id = weather.stationid
+----
+
+WARNING: Make sure to stop your queries to release all resources once you finish this lab. You can double-check that all queries/jobs have been stopped by clicking on the *SQL Jobs* tab. If any jobs are still running, you can stop them from that page.
+
+
+[[lab_7, Lab 7]]
+== Lab 7 - Look up Reference data stored in Kudu
+In the next Lab we join the data stream with static data e.g. reference data.
+
+. To create the Kudu table we have to go back to the entry screen
+. Use the Hue Web UI and login as `admin` / `supersecret1`. The first user to login to a Hue installation is automatically created and granted admin privileges in Hue.
+. The Hue UI should open with the Impala Query Editor by default. If it doesn't, you can always find it by clicking on *Query button > Editor -> Impala*:
++
+image::images/impala_editor.png[width=800]
+
+. Copy & past the following DDL which creates some tables and insert some reference data into it:
++
+WARNING: See link:data/RefData_geolocation.sql[Create SQL Statement]
+
++
+image::images/create_table.png[width=800]
++
+. Select all copied lines and execute
+. Go back to SSB to add Kudu as a new data source: *Data Providers > Register Catalog*
++
+
+.  *Edit Catalog* window, enter the following information:
++
+[source,yaml]
+----
+Name:           kudu_source
+Catalog Type:   Kudu
+Kudu Master:    <CLUSTER_HOSTNAME>:7051
+----
++
+image::images/ssb-add-kudu-source-virtual-table.png[width=800]
++
+. Click *Validate* ->  _Validation was successful, 2 tables found_
+. Click *Add Tables*
+. Kudu tables are show up now as virtual tables
++
+image::images/ssb-as-kudu-source-virtual-table.png[width=800]
++
+. Click on a kudu table and see the schema (DLL) of the table
++
+image::images/ssb-kudu-schema.png[width=800]
++
+. Back to the Console - add a standard SQL lookup
++
+[source,sql]
+----
+select iot.sensor_id,
+ sensor_0 as pressure,
+ sensor_1 as torsion,
+ city,
+ lat,
+ lon
+from iot_enriched_source as iot, `kudu_source`.`default_database`.`default.refdata_geolocation` as refdata
+where iot.sensor_id = refdata.sensor_id
+----
+
+[[lab_8, Lab 8]]
+== Lab 8 - Materialized Views
+*Materialized Views* are in synchronization with the mutating stream - they are updated by a primary key as data flows through the system. The data is updated by a given key, and it represents the latest view of the data by key.
+
+. Stop the SQL from the last lab and click in the *Console* on *Materialized Views*
++
+image::images/ssb-mv-base.png[width=800]
++
+. Configuration and *Apply Configuration*
++
+[source,shell]
+----
+Primary Key            sensor_id
+Retention (Seconds)    300
+Recreate on Job Start  Y
+Ignore NULLs           N
+API Key                <create API key>
+----
++
+. Click *Add Query* to provide a URI name and select the attributes in the Materialized View
+. Click *Add filters* to apply computations and further enrichment of your data
+.. Defining *parameters* for the filter criteria in the URI like /api/v1/query/5195/sensorid/*{sensor_id}*
+.. Use the defiled  *parameters* in the filter statement like a normal SQL WHERE clause
++
+image::images/ssb-mv-addQuery.png[width=400]
++
+.. REST endpoint is exposed as: <URI>/api/v1/query/<job id>/sensorid/*{sensor_id}*?key=<API Key>
+.. invoke it with: sample /api/v1/query/5195/sensorid/*12*?key=AbzRvs....
+
+. Back in the *SQL tab.* restart job with the SQL from the last lab again
+
+[[lab_9, Lab 9]]
+== Lab 9 - Perform an HTTP action
+You can configure the *webhook table* to perform an HTTP action per message (default) or to create code that controls the frequency (for instance, every N messages).
+
+WARNING: Open new browser in _incognito mode_ and create a new http endpoint at https://webhook.site
+
+. Select Console from the main menu.
+. Select the Tables tab.
+. Select Add table > Webhook. The *Webhook Table* window appears.
++
+
+[source,shell]
+----
+Table name              webhook_table
+Http EndPoint           webhook endpoint https://
+HttpMethod              POST
+Disable SSL Validation  no
+Enable Request Template yes
+----
++
+. In the *Code editor*, you can specify a code block that controls how the webhook displays the data.
+For a webhook that is called for each message the following code is used:
++
+image::images/ssb-webhooktable-code.png[width=600]
++
+[source,javascript]
+----
+// Boolean function that takes entire row from query as Json Object
+function onCondition(rowAsJson)
+{return true;   // return false here for no-op, or plug in custom
+        logic}
+onCondition($p0)
+----
++
+. Add HTTP headers using the HTTP Headers tab, if needed.
++
+image::images/ssb-webhooktable-httpheader.png[width=600]
++
+[source,shell]
+----
+Http Header     Content-Type
+Value           application/json
+----
++
+. Press the *plus* sign to save
+. On the *Request Template* tab modify template
++
+image::images/ssb-webhooktable-requesttemplate.png[width=600]
++
+[source,javascript]
+----
+{
+   "incident":{
+      "type":"incident",
+      "title":"${sensor_id} - pressure is too high!",
+        "body":{
+   "type":"incident_body",
+         "details":"Sensor with id ${sensor_id} has ${sensor_0} pascal."
+      }
+    }
+}
+----
+. Click *Save changes*
+. On the *Console* *> Compose > SQL* and type the following query:
++
+[source,sql]
+----
+INSERT INTO webhook_table
+SELECT sensor_id, sensor_0
+FROM iot_enriched_source
+WHERE sensor_0 >= 8000
+----
++
+image::images/ssb-webhook-sql.png[width=600]
++
+. Click *Execute*
+. Back on the https://webhook.site page you will see the submitted messages
++
+image::images/ssb-webhook-result.png[width=600]
+
+
+== End of the _Streaming SQL_ Lab's (for today)
+
