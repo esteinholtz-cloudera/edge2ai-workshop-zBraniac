@@ -412,7 +412,7 @@ Record Reader:    JsonTreeReader - With schema identifier
 
 . Connect the *Write to Kudu* to the same _Funnel_ you had created above. When prompted, check the *failure* relationship for this connection.
 
-. Double-click on the *Write to Kudu* processor, go to the *SETTINGS* tab, check the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
+. Double-click on the *Write to Kudu* processor, go to the *RELATIONSHIPS* tab and check the "*terminate*" checkbox for the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
 
 ==== Create the Kudu table
 
