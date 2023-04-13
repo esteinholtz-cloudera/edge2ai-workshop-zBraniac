@@ -414,6 +414,9 @@ Record Reader:    JsonTreeReader - With schema identifier
 
 . Double-click on the *Write to Kudu* processor, go to the *RELATIONSHIPS* tab and check the "*terminate*" checkbox for the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
 
++
+image::images/terminate_putkudu_relationship.png[width=800]
+
 ==== Create the Kudu table
 
 NOTE: If you already created this table in a previous workshop, please skip the table creation here.
