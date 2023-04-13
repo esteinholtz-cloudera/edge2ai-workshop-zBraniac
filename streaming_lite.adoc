@@ -106,11 +106,14 @@ image::images/global_controller_settings.png[width=800]
 +
 image::images/add_registry_client_1.png[width=800]
 +
-image::images/add_registry_client_2.png[width=800]
-Open the "Nifi Registry" entry you have just created by clicking on the pencil icon and add the following URL:
+. Open the "Nifi Registry" entry you have just created by clicking on the pencil icon and add the following URL:
++
 ----
 URL:  http://<CLUSTER_HOSTNAME>:18080
 ----
++
+image::images/add_registry_client_2.png[width=800]
+
 +
 image::images/add_registry_client_3.png[width=800]
 
