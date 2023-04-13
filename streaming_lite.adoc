@@ -37,7 +37,7 @@ Alternatively, you could set that to other time intervals: 1 sec, 30 sec, 1 min,
 +
 image::images/runSimulator1or30.png[width=500]
 
-. In the *SETTINGS* tab, check the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
+. In the *RELATIONSHIPS* tab, check the "*terminate*" checkbox under the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
 +
 image::images/nifiTerminateRelationships.png[width=600]
 
