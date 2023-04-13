@@ -95,16 +95,24 @@ Before we start building our flow, let's create a Process Group to help organizi
 +
 image::images/create_pgroup_lite.png[width=800]
 
-. We want to be able to version control the flows we will add to the Process Group. In order to do that, we first need to connect NiFi to the *NiFi Registry*. On the NiFi global menu, click on "Controller Settings", navigate to the "Registry Clients" tab and add a Registry client with the following URL:
+. We want to be able to version control the flows we will add to the Process Group. In order to do that, we first need to connect NiFi to the *NiFi Registry*. On the NiFi global menu, click on "Controller Settings", navigate to the "Registry Clients" tab and add a Registry client with the type "NifiRegistryFlowRegistryClient":
 +
 ----
 Name: NiFi Registry
-URL:  http://<CLUSTER_HOSTNAME>:18080
+Type: NifiRegistryFlowRegistryClient
 ----
 +
 image::images/global_controller_settings.png[width=800]
 +
-image::images/add_registry_client.png[width=800]
+image::images/add_registry_client_1.png[width=800]
++
+image::images/add_registry_client_2.png[width=800]
+Open the "Nifi Registry" entry you have just created by clicking on the pencil icon and add the following URL:
+----
+URL:  http://<CLUSTER_HOSTNAME>:18080
+----
++
+image::images/add_registry_client_3.png[width=800]
 
 . On the *NiFi Registry* Web UI, add another bucket for storing the Sensor flow we're about to build'. Call it `SensorFlows`:
 +
