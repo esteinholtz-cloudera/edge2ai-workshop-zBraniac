@@ -261,7 +261,7 @@ Later, this will help us clearly identify who is producing data into the Kafka t
 +
 image::images/add_kafka_failure_connection.png[width=600]
 
-. Double-click on the *Publish to Kafka topic: iot* processor, go to the *SETTINGS* tab, check the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
+. Double-click on the *Publish to Kafka topic: iot* processor, go to the *RELATIONSHIPS* tab, check the "*terminate*" checkbox for the "*success*" relationship in the *AUTOMATICALLY TERMINATED RELATIONSHIPS* section. Click *Apply*.
 +
 image::images/terminate_publishkafka_relationship.png[width=600]
 
