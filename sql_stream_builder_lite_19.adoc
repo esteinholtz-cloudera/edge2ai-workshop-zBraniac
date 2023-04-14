@@ -18,15 +18,18 @@ So let's start with a straightforward goal: to query the contents of the `iot` t
 
 Albeit simple, this task will show the ease of use and power of SQL Stream Builder (SSB).
 
+Open the *ssb_default* project and take a look at the the connection to our local Kafka cluster, which was already defined under *Data Sources > Kafka > Local Kafka*. SSB can be connected to multiple Kafka clusters to bring data from different environments together.
+
 [[lab_1, Lab 1]]
 == Lab 1 - Create a Source Virtual Table for a topic with JSON messages
 
-Now we can _map_ the `iot` topic to a _virtual table_ that we can reference in our query. _Virtual Tables_ on SSB are a way to associate a Kafka topic with a schema so that we can use that as a table in our queries.
+We can _map_ the `iot` topic to a _virtual table_ that we can reference in our query. _Virtual Tables_ on SSB are a way to associate a Kafka topic with a schema so that we can use that as a table in our queries.
 
 We will use a Source Virtual Table now to read from the topic. Later we will look into Sink Virtual Tables to write data to Kafka.
 
-. To create our first Source Virtual Table, click on *Console* (on the left bar) *> Tables > Add table > Apache Kafka*.
+. To create our first Source Virtual Table, click on the *Console* (on the left bar) *> Tables > Add table > Apache Kafka*.
 +
+image::images/ssb-open-virtual-tables.png[width=800]
 image::images/ssb-add-source-virtual-table.png[width=800]
 
 . On the *Kafka Source* window, enter the following information:
@@ -34,9 +37,9 @@ image::images/ssb-add-source-virtual-table.png[width=800]
 [source,yaml]
 ----
 Virtual table name: iot_enriched_source
-Kafka Cluster:      CDP Kafka
-Topic Name:         iot
+Kafka Cluster:      Local Kafka
 Data Format:        JSON
+Topic Name:         iot
 ----
 +
 image::images/ssb-kafka-source.png[width=400]
