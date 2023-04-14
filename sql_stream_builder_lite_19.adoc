@@ -101,7 +101,7 @@ image::images/ssb-create-review.png[width=400]
 NOTE: Setting the *Consumer Group* properties for a virtual table will ensure that if you stop a query and restart it later, the second query execute will continue to read the data from the point where the first query stopped, without skipping data. *However*, if _multiple queries_ use the same virtual table, setting this property will effectively distribute the data across the queries so that each record is only read by a single query. If you want to share a virtual table with multiple distinct queries, ensure that the Consumer Group property is unset.
 
 [[lab_2, Lab 2]]
-== Lab 2 -  - Run a simple query
+== Lab 2 - Run a simple query
 
 We have now all that we need to run our first query in SSB. We want to simply query the raw contents of topic to ensure that the everything is working correctly before we proceed to do more complex things.
 
@@ -207,7 +207,7 @@ GROUP BY
 . Next the `sensor6_stats_sink` table must be created in SSB, mapping it to the `sensor6_stats` Kafka topic.
 
 +
-. Since we want the topic format to be JSON, click on *Templates > CDP Kafka > JSON*.
+. Since we want the topic format to be JSON, click on *Templates > Local Kafka > JSON*.
 +
 image::images/template-kafka-json.png[width=800]
 
@@ -256,7 +256,7 @@ NOTE: The `sensor6_stats` job will continue to run in the background. You can mo
 [source,yaml]
 ----
 Virtual table name: sensor6_stats_source
-Kafka Cluster:      CDP Kafka
+Kafka Cluster:      Local Kafka
 Topic Name:         sensor6_stats
 Data Format:        JSON
 ----
