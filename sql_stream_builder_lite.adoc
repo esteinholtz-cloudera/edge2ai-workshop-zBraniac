@@ -42,12 +42,12 @@ Data Format:        JSON
 Topic Name:         iot
 ----
 +
-image::images/ssb-kafka-source.png[width=400]
+image::images/ssb-kafka-source.png[width=800]
 
 . Ensure the *Schema* tab is selected. Scroll to the bottom of the tab and click *Detect Schema*. SSB will take a sample of the data flowing through the topic and will infer the schema used to parse the content. Alternatively you could also specify the schema in this tab.
 +
 
-image::images/ssb-detect-schema.png[width=400]
+image::images/ssb-detect-schema.png[width=800]
 . Click on the *Event Time* tab, define your time handling. You can specify Watermark Definitions when adding a Kafka table. Watermarks use an event time attribute and have a watermark strategy, and can be used for various time-based operations.
 +
 The *Event Time* tab provides the following properties to configure the event time field and watermark for the Kafka stream:
@@ -63,7 +63,7 @@ Event Time Column:      event_ts
 Watermark Seconds:      3
 ----
 +
-image::images/ssb-define-timehandling.png[width=400]
+image::images/ssb-define-timehandling.png[width=800]
 . If we need to manipulate the source data to fix, cleanse or convert some values, we can define *transformations* for the data source to perform those changes. These transformations are defined in Javascript.
 +
 The serialized record read from Kafka is provided to the Javascript code in the `record.value` variable. The last command of the transformation must return the serialized content of the modified record.
@@ -81,7 +81,7 @@ payload['sensor_ts'] = Math.round(payload.sensor_ts / 1000);
 JSON.stringify(payload);
 ----
 +
-image::images/ssb-source-transformations.png[width=400]
+image::images/ssb-source-transformations.png[width=800]
 . Click on the *Properties* tab, enter the following value for the *Consumer Group* property and click *Save changes*.
 +
 [source,yaml]
@@ -90,11 +90,11 @@ Consumer Group: ssb-iot-1
 ----
 
 +
-image::images/ssb-source-properties.png[width=400]
+image::images/ssb-source-properties.png[width=800]
 +
 . Click on "Create and Review"
 +
-image::images/ssb-create-review.png[width=400]
+image::images/ssb-create-review.png[width=800]
 +
 . Click on "Keep" to save the virtual table
 +
