@@ -109,11 +109,11 @@ We have now all that we need to run our first query in SSB. We want to simply qu
 
 If your environment is healthy and all the steps from previous labs were completed correctly you should be able to visualize the data with the steps below.
 
-. On the SSB Explorer, click the three dots next to *Jobs* and select *New Job*:
+. In the SSB *Explorer*, click the three dots next to *Jobs* and select *New Job*:
 +
 image::images/ssb-create-job.png[width=800]
 
-. In the *Create New Job* window, enter a *Job Name* for your SSB job or use the random name provided. Then click *Create*:
+. In the *Create New Job* window, enter a *Job Name* for your SSB job (e.g. `query_iot_topic`) or use the random name provided. Then click *Create*:
 +
 image::images/ssb-set-jobname.png[width=400]
 
@@ -175,7 +175,7 @@ WARNING: Make sure to stop your queries to release all resources once you finish
 
 [[lab_3, Lab 3]]
 == Lab 3 - Computing and storing aggregation results
-This query will compute aggregates over 30-seconds windows that slide forward every second. For a specific sensor value in the record (`sensor_6`) it computes the following aggregations for each window:
+In this lab we will create a query which computes aggregates over 30-seconds windows that slide forward every second. For a specific sensor value in the record (`sensor_6`) it computes the following aggregations for each window:
 
 ..  Number of events received
 .. Sum of the `sensor_6` value for all the events
@@ -198,11 +198,15 @@ Streams Messaging Manager Web UI*).
 
 On the SSB UI:
 
-. Click on Console (on the left bar) *> Compose > SQL*
+. In the SSB *Explorer*, click the three dots next to *Jobs* and select *New Job*:
 +
-. Create new job, enter e.g. `Sensor6Stats` for the *SQL Job Name* field.
+image::images/ssb-create-job.png[width=800]
+
+. In the *Create New Job* window, enter a *Job Name* for your SSB job (e.g. `Sensor6Stats`) or use the random name provided. Then click *Create*:
 +
-. In the SQL box type the query shown below.
+image::images/ssb-set-jobname-sensorstats.png[width=400]
+
+. Copy the following query into the input box:
 +
 [source,sql]
 ----
@@ -228,7 +232,7 @@ GROUP BY
 +
 image::images/template-kafka-json.png[width=800]
 
-. This will prepend a `CREATE TABLE` DDL to the SQL script to create a table that matches the structure of your query! Adjusted the name e.g. `sensor6_stats_sink`
+. This will prepend a `CREATE TABLE` DDL to the SQL script to create a table that matches the structure of your query! Adjust the name e.g. `sensor6_stats_sink`
 +
 image::images/template-table-ddl.png[width=800]
 +
@@ -238,9 +242,11 @@ Edit the DDL statement and replace the `...` value of the `topic` property with 
 +
 image::images/template-table-edited.png[width=300]
 +
+. You can delete the "Select" statement below the "Create table" statement as we only want to create the sink table.
++
 . Click *Execute* to create the sink table
 +
-. Copy & past the SQL box again, this time including a`sensor6_stats_sink` statement on top.
+. Copy & paste the SQL box again, this time including a `INSERT INTO sensor6_stats_sink` statement on top.
 +
 [source,sql]
 ----
