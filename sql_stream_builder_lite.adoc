@@ -32,7 +32,7 @@ We will use a Source Virtual Table now to read from the topic. Later we will loo
 image::images/ssb-open-virtual-tables.png[width=800]
 image::images/ssb-add-source-virtual-table.png[width=800]
 
-. On the *Kafka Source* window, enter the following information:
+. On the *Kafka Table* window, enter the following information:
 +
 [source,yaml]
 ----
@@ -44,17 +44,19 @@ Topic Name:         iot
 +
 image::images/ssb-kafka-source.png[width=800]
 
-. Ensure the *Schema* tab is selected. Scroll to the bottom of the tab and click *Detect Schema*. SSB will take a sample of the data flowing through the topic and will infer the schema used to parse the content. Alternatively you could also specify the schema in this tab.
+. On the bottom of the window click *Detect Schema*. SSB will take a sample of the data flowing through the topic and will infer the schema used to parse the content. Alternatively you could also specify the schema in this tab.
 +
 
 image::images/ssb-detect-schema.png[width=800]
-. Click on the *Event Time* tab, define your time handling. You can specify Watermark Definitions when adding a Kafka table. Watermarks use an event time attribute and have a watermark strategy, and can be used for various time-based operations.
+. Click on the *Event Time* tab to define your time handling. You can specify Watermark Definitions when adding a Kafka table. Watermarks use an event time attribute and have a watermark strategy, and can be used for various time-based operations.
 +
 The *Event Time* tab provides the following properties to configure the event time field and watermark for the Kafka stream:
++
+(In order to make *Input Timestamp Column* visible, you need to disable the *Use Kafka Timestamps* toggle.)
 
-* *Input Timestamp* Column: name of the timestamp column in the Kafka table from where the event time column is mapped. If you wanna use a colume from the event message you have to unselect the box _Use Kafka Timestamp_ first.
-* *Event Time* Column: new name of the timestamp column where the watermarks are going to be mapped
-* *Watermark seconds* : number of seconds used in the watermark strategy. The watermark is defined by the current event timestamp minus this value.
+* *Input Timestamp Column* : name of the timestamp column in the Kafka table from where the event time column is mapped. If you wanna use a colume from the event message you have to unselect the box _Use Kafka Timestamp_ first.
+* *Event Time Column* : new name of the timestamp column where the watermarks are going to be mapped
+* *Watermark Seconds* : number of seconds used in the watermark strategy. The watermark is defined by the current event timestamp minus this value.
 +
 [source,yaml]
 ----
@@ -70,7 +72,7 @@ The serialized record read from Kafka is provided to the Javascript code in the 
 +
 The `sensor_0` data in the `iot` topic has a pressure expressed in micro-pascal. Let's say we need the value in pascal scale. Let's write a transformation to perform that conversion for us at the source.
 +
-Click on the *Transformations* tab and enter the following code in the *Code* field:
+Click on the *Data Transformations* tab and copy the following code into the input box:
 +
 [source,javascript]
 ----
@@ -96,7 +98,7 @@ image::images/ssb-source-properties.png[width=800]
 +
 image::images/ssb-create-review.png[width=800]
 +
-. Click on "Keep" to save the virtual table
+. Click on "Close" to close to the *Kafka Table* window.
 +
 NOTE: Setting the *Consumer Group* properties for a virtual table will ensure that if you stop a query and restart it later, the second query execute will continue to read the data from the point where the first query stopped, without skipping data. *However*, if _multiple queries_ use the same virtual table, setting this property will effectively distribute the data across the queries so that each record is only read by a single query. If you want to share a virtual table with multiple distinct queries, ensure that the Consumer Group property is unset.
 
