@@ -196,7 +196,7 @@ Streams Messaging Manager Web UI*).
 ... Cleanup Policy: `delete`
 
 
-On the SSB UI:
+Go back to the SSB UI:
 
 . In the SSB *Explorer*, click the three dots next to *Jobs* and select *New Job*:
 +
@@ -266,30 +266,45 @@ GROUP BY
   HOP(event_ts, INTERVAL '1' SECOND, INTERVAL '30' SECOND);
 ----
 +
-. Let’s query the `sensor6_stats` topic to examine the data that is being written to it. Create a new job via `+ New Job`
+. *Execute* the query to write data into the virtual table `sensor6_stats_sink` / the Kafka topic `sensor6_stats`. Keep the job running.
++
+. Let’s query the `sensor6_stats` topic to examine the data that is being written to it. 
+In the SSB *Explorer*, click the three dots next to *Jobs* and select *New Job*:
++
+image::images/ssb-create-job.png[width=800]
 +
 NOTE: The `sensor6_stats` job will continue to run in the background. You can monitor and manage it through the *SQL Jobs* page.
 
 . Let's query the `sensor6_stats` table to examine the data that is being written to it. First we need to define a Source Table associated with the `sensor6_stats` topic.
 +
+image::images/ssb-new-virtual-table-2.png[width=800]
++
 --
-.. Click on *Console* (on the left bar) *> Apache Kafka*
-.. On the *Kafka Source* window, enter the following information and click *Save changes*:
+.. In the SSB *Explorer*, click the three dots next to *Virtual Tables* and select *New Kafka Table*:
+.. On the *Kafka Table* window, enter the following information:
 +
 [source,yaml]
 ----
-Virtual table name: sensor6_stats_source
+Table name:         sensor6_stats_source
 Kafka Cluster:      Local Kafka
 Topic Name:         sensor6_stats
 Data Format:        JSON
 ----
---
 .. Click on *Detect Schema* and wait for the schema to be updated.
-.. Click *Save changes*.
-
-. Click on *Console* (on the left bar) to refresh the screen and clear the SQL Compose field, which may still show the running aggregation job.
+.. Click *Create and Review*.
+.. Click *Close* to close the *Kafka Table* window.
+--
 +
-Note that the job will continue to run in the background and you can continue to monitor it through the *Job Logs* page.
+image::images/ssb-new-virtual-table-sensor6stats.png[width=600]
+
+. Now we can look at the data in the Kafka topic by querying the new virtual table.
+In the SSB *Explorer*, click the three dots next to *Jobs* and select *New Job*:
++
+image::images/ssb-create-job.png[width=800]
+
+. In the *Create New Job* window, enter a *Job Name* for your SSB job (e.g. `QuerySensorStatsKafkaTopic`) or use the random name provided. Then click *Create*:
++
+image::images/ssb-set-jobname-sensorstatskafka.png[width=400]
 
 . Enter the following query in the SQL field and execute it:
 +
@@ -299,7 +314,7 @@ SELECT *
 FROM sensor6_stats_source
 ----
 
-. After a few seconds you should see the contents of the `sensor6_stats` topic displayed on the screen:
+. After a few seconds you should see the contents of the `sensor6_stats` topic displayed on the *Results* tab.
 
 +
 [WARNING]
