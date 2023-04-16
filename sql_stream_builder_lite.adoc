@@ -297,7 +297,7 @@ Data Format:        JSON
 +
 image::images/ssb-new-virtual-table-sensor6stats.png[width=600]
 
-. Now we can look at the data in the Kafka topic by querying the new virtual table.
+. Now we can take a look at the data in the Kafka topic by querying the new virtual table.
 In the SSB *Explorer*, click the three dots next to *Jobs* and select *New Job*:
 +
 image::images/ssb-create-job.png[width=800]
@@ -306,7 +306,7 @@ image::images/ssb-create-job.png[width=800]
 +
 image::images/ssb-set-jobname-sensorstatskafka.png[width=400]
 
-. Enter the following query in the SQL field and execute it:
+. Copy the following query into the SQL field and execute it:
 +
 [source,sql]
 ----
@@ -314,7 +314,7 @@ SELECT *
 FROM sensor6_stats_source
 ----
 
-. After a few seconds you should see the contents of the `sensor6_stats` topic displayed on the *Results* tab.
+. After a few seconds you should see the contents of the `sensor6_stats` topic displayed in the *Results* tab.
 
 +
 [WARNING]
