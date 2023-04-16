@@ -109,6 +109,14 @@ We have now all that we need to run our first query in SSB. We want to simply qu
 
 If your environment is healthy and all the steps from previous labs were completed correctly you should be able to visualize the data with the steps below.
 
+. On the SSB Explorer, click the three dots next to *Jobs* and select *New Job*:
++
+image::images/ssb-create-job.png[width=800]
+
+. In the *Create New Job* window, enter a *Job Name* for your SSB job or use the random name provided. Then click *Create*:
++
+image::images/ssb-set-jobname.png[width=400]
+
 . On the SSB UI, click on *Console* (on the left bar) *> Compose add the following query:
 +
 [source,sql]
