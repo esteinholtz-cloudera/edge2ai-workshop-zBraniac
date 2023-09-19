@@ -218,7 +218,7 @@ image::images/set_schemaName.png[width=800]
 +
 image::images/create_mqtt_connection.png[width=800]
 
-. Add a _PublishKafkaRecord_2.0_ processor and configure it as follows:
+. Add a _PublishKafkaRecord_2.6_ processor and configure it as follows:
 +
 *SETTINGS* tab:
 +
@@ -239,9 +239,9 @@ Use Transactions:                      false
 Attributes to Send as Headers (Regex): schema.*
 ----
 +
-NOTE: Make sure you use the PublishKafkaRecord_2.0 processor and *not* the PublishKafka_2.0 one
+NOTE: Make sure you use the PublishKafkaRecord_2.6 processor and *not* the PublishKafka_2.6 one
 
-. While still in the _PROPERTIES_ tab of the _PublishKafkaRecord_2.0_ processor, click on the image:images/plus_button.png[width=25] button and add the following property:
+. While still in the _PROPERTIES_ tab of the _PublishKafkaRecord_2.6_ processor, click on the image:images/plus_button.png[width=25] button and add the following property:
 +
 [source]
 ----
