@@ -157,7 +157,7 @@ image::images/ssb-sql-results.png[width=800]
 [source,sql]
 ----
 select sensor_id,
-  count(*) as sensorCount
+  count(*) as ReadingCount
 from iot_enriched_source
 group by sensor_id
 ----
@@ -213,7 +213,7 @@ image::images/ssb-set-jobname-sensorstats.png[width=400]
 SELECT
   sensor_id as device_id,
   HOP_END(event_ts, INTERVAL '1' SECOND, INTERVAL '30' SECOND) as windowEnd,
-  count(*) as sensorCount,
+  count(*) as ReadingCount,
   sum(sensor_6) as sensorSum,
   avg(cast(sensor_6 as float)) as sensorAverage,
   min(sensor_6) as sensorMin,
@@ -254,7 +254,7 @@ INSERT INTO sensor6_stats_sink
 SELECT
   sensor_id as device_id,
   HOP_END(event_ts, INTERVAL '1' SECOND, INTERVAL '30' SECOND) as windowEnd,
-  count(*) as sensorCount,
+  count(*) as ReadingCount,
   sum(sensor_6) as sensorSum,
   avg(cast(sensor_6 as float)) as sensorAverage,
   min(sensor_6) as sensorMin,
